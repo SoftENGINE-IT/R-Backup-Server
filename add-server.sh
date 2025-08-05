@@ -18,7 +18,7 @@ time_to_cron() {
     echo "$MINUTE $HOUR * * *"
 }
 
-# 1. Eingaben
+# Eingaben
 read -p "Name des neuen Servers: " SERVERNAME
 read -p "IP des neuen Servers: " SERVERIP
 read -p "Pfad des SMB-Shares [Standard: J]: " SHAREPATH
@@ -27,7 +27,7 @@ read -p "Benutzername des SMB-Shares: " SMBUSER
 read -s -p "Passwort des SMB-Shares: " SMBPASS
 echo
 
-# 2. SMB-Credentials-Datei erstellen
+# SMB-Credentials
 CRED_FILE="${CRED_DIR}/${SERVERNAME}.smbcredentials"
 cat > "$CRED_FILE" <<EOF
 username=${SMBUSER}
@@ -40,12 +40,11 @@ read -p "Tägliche Backups um: " TIME_DAILY
 read -p "Wöchentliche Backups um: " TIME_WEEKLY
 read -p "Monatliche Backups um: " TIME_MONTHLY
 
-# Zeiten umwandeln
 CRON_DAILY=$(time_to_cron "$TIME_DAILY")
-CRON_WEEKLY=$(time_to_cron "$TIME_WEEKLY" | sed 's/* \* 0/* * 0/')   # Sonntag
-CRON_MONTHLY=$(time_to_cron "$TIME_MONTHLY" | sed 's/* \* \*/1 * */') # 1. des Monats
+CRON_WEEKLY=$(time_to_cron "$TIME_WEEKLY" | sed 's/* \* 0/* * 0/')
+CRON_MONTHLY=$(time_to_cron "$TIME_MONTHLY" | sed 's/* \* \*/1 * */')
 
-# 3. Retention
+# Retention
 read -p "Abweichende Retention-Zeiträume? (y/N): " RET
 RET=${RET:-N}
 
@@ -62,7 +61,7 @@ if [[ "$RET" =~ ^[Yy]$ ]]; then
     MONTHLYS=${MONTHLYS:-3}
 fi
 
-# 4. rsnapshot-Konfiguration erstellen
+# rsnapshot-Konfig erstellen
 RSNAP_CONF="${CONFIG_DIR}/${SERVERNAME}.conf"
 cat > "$RSNAP_CONF" <<EOF
 config_version  1.2
@@ -78,7 +77,7 @@ cmd_ssh         /usr/bin/ssh
 cmd_logger      /usr/bin/logger
 EOF
 
-# 5. Backupskripte erstellen
+# Skripte erstellen
 mkdir -p "${LOGS_DIR}/${SERVERNAME}"
 
 for TYPE in daily weekly monthly; do
@@ -90,7 +89,7 @@ EOF
     chmod +x "$SCRIPT_PATH"
 done
 
-# 6. Cronjobs einrichten
+# Cronjobs hinzufügen
 TMP_CRON=$(mktemp)
 crontab -l 2>/dev/null > "$TMP_CRON"
 

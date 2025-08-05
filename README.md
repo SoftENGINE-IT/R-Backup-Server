@@ -64,6 +64,8 @@ Nur root hat Zugriff (chmod 600).
 ├── cron-vorlage.sh
 ├── configs/            # rsnapshot-Konfigurationen
 │   └── WWR02.conf
+├── credentials/
+│   └── WWR02.smbcredentials
 ├── jobs/               # Generierte Skripte
 │   ├── WWR02-daily.sh
 │   ├── WWR02-weekly.sh
@@ -91,3 +93,9 @@ Default:
 - daily: 7 Versionen
 - weekly: 4 Versionen
 - monthly: 3 Versionen
+
+### Mailbenachrichtigungen
+
+- Erfolgreiche Backups: Mail mit Erfolgsmeldung
+- Fehlgeschlagene Backups: Mail mit Logausgabe im Body
+- E-Mail-Adresse wird bei `setup.sh` hinterlegt und kann in `/opt/R-Backup-Server/mail.conf` angepasst werden
