@@ -13,7 +13,11 @@ echo "Erstelle Projektverzeichnisse..."
 mkdir -p /opt/R-Backup-Server/jobs
 mkdir -p /opt/R-Backup-Server/logs
 mkdir -p /opt/R-Backup-Server/configs
+mkdir -p /opt/R-Backup-Server/credentials
 mkdir -p /mnt/live-backup
+
+# Rechte absichern
+chmod 700 /opt/R-Backup-Server/credentials
 
 # Skripte kopieren (falls aus GitHub geklont)
 cp add-server.sh /opt/R-Backup-Server/

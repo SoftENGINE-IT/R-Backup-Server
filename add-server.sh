@@ -5,8 +5,9 @@ BASE_DIR="/opt/R-Backup-Server"
 CONFIG_DIR="${BASE_DIR}/configs"
 JOBS_DIR="${BASE_DIR}/jobs"
 LOGS_DIR="${BASE_DIR}/logs"
+CRED_DIR="${BASE_DIR}/credentials"
 
-mkdir -p "$CONFIG_DIR" "$JOBS_DIR" "$LOGS_DIR"
+mkdir -p "$CONFIG_DIR" "$JOBS_DIR" "$LOGS_DIR" "$CRED_DIR"
 
 # Funktion: Uhrzeit (HH:MM) in Cron-Format umwandeln
 time_to_cron() {
@@ -26,6 +27,14 @@ read -p "Benutzername des SMB-Shares: " SMBUSER
 read -s -p "Passwort des SMB-Shares: " SMBPASS
 echo
 
+# 2. SMB-Credentials-Datei erstellen
+CRED_FILE="${CRED_DIR}/${SERVERNAME}.smbcredentials"
+cat > "$CRED_FILE" <<EOF
+username=${SMBUSER}
+password=${SMBPASS}
+EOF
+chmod 600 "$CRED_FILE"
+
 echo "Backup-Zeiten eingeben (HH:MM-Format):"
 read -p "Tägliche Backups um: " TIME_DAILY
 read -p "Wöchentliche Backups um: " TIME_WEEKLY
@@ -36,7 +45,7 @@ CRON_DAILY=$(time_to_cron "$TIME_DAILY")
 CRON_WEEKLY=$(time_to_cron "$TIME_WEEKLY" | sed 's/* \* 0/* * 0/')   # Sonntag
 CRON_MONTHLY=$(time_to_cron "$TIME_MONTHLY" | sed 's/* \* \*/1 * */') # 1. des Monats
 
-# 2. Retention
+# 3. Retention
 read -p "Abweichende Retention-Zeiträume? (y/N): " RET
 RET=${RET:-N}
 
@@ -53,7 +62,7 @@ if [[ "$RET" =~ ^[Yy]$ ]]; then
     MONTHLYS=${MONTHLYS:-3}
 fi
 
-# 3. rsnapshot-Konfiguration erstellen
+# 4. rsnapshot-Konfiguration erstellen
 RSNAP_CONF="${CONFIG_DIR}/${SERVERNAME}.conf"
 cat > "$RSNAP_CONF" <<EOF
 config_version  1.2
@@ -69,19 +78,19 @@ cmd_ssh         /usr/bin/ssh
 cmd_logger      /usr/bin/logger
 EOF
 
-# 4. Backupskripte erstellen
+# 5. Backupskripte erstellen
 mkdir -p "${LOGS_DIR}/${SERVERNAME}"
 
 for TYPE in daily weekly monthly; do
     SCRIPT_PATH="${JOBS_DIR}/${SERVERNAME}-${TYPE}.sh"
     cat > "$SCRIPT_PATH" <<EOF
 #!/bin/bash
-${BASE_DIR}/cron-vorlage.sh "$SERVERNAME" "$SERVERIP" "$SHAREPATH" "$SMBUSER" "$SMBPASS" "$TYPE"
+${BASE_DIR}/cron-vorlage.sh "$SERVERNAME" "$SERVERIP" "$SHAREPATH" "$TYPE"
 EOF
     chmod +x "$SCRIPT_PATH"
 done
 
-# 5. Cronjobs einrichten
+# 6. Cronjobs einrichten
 TMP_CRON=$(mktemp)
 crontab -l 2>/dev/null > "$TMP_CRON"
 

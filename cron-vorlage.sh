@@ -1,27 +1,34 @@
 #!/bin/bash
 # Vorlage: cron-vorlage.sh
-# Parameter: $1 = SERVERNAME, $2 = IP, $3 = SHARE, $4 = USER, $5 = PASS, $6 = BACKUP-TYP
+# Parameter: $1 = SERVERNAME, $2 = IP, $3 = SHARE, $4 = BACKUP-TYP
 
 SERVERNAME="$1"
 SERVERIP="$2"
 SHAREPATH="$3"
-SMBUSER="$4"
-SMBPASS="$5"
-BACKUPTYPE="$6"
+BACKUPTYPE="$4"
 
 BASE_DIR="/opt/R-Backup-Server"
 MOUNTPOINT="/mnt/live-backup"
 LOGDIR="${BASE_DIR}/logs/${SERVERNAME}"
 LOGFILE="${LOGDIR}/${SERVERNAME}-${BACKUPTYPE}.log"
+CRED_FILE="${BASE_DIR}/credentials/${SERVERNAME}.smbcredentials"
+LOCKFILE="/tmp/r-backup-${SERVERNAME}.lock"
 STATUSFILE="backups_complete"
 
 mkdir -p "$LOGDIR"
+
+# Lock setzen (verhindert parallele Ausführung)
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+    echo "Backup für $SERVERNAME ($BACKUPTYPE) läuft bereits – Abbruch." > "$LOGFILE"
+    exit 1
+fi
 
 echo "=== Backup $BACKUPTYPE gestartet am $(date '+%Y-%m-%d %H:%M:%S') ===" > "$LOGFILE"
 
 # 1. SMB-Share mounten
 echo "Mounting SMB share..." >> "$LOGFILE"
-mount -t cifs "//$SERVERIP/$SHAREPATH" "$MOUNTPOINT" -o username="$SMBUSER",password="$SMBPASS",vers=3.0
+mount -t cifs "//$SERVERIP/$SHAREPATH" "$MOUNTPOINT" -o credentials="$CRED_FILE",vers=3.0
 if [ $? -ne 0 ]; then
     echo "Error: Failed to mount SMB share." >> "$LOGFILE"
     exit 1

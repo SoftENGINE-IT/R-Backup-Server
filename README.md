@@ -8,6 +8,8 @@ Automatisiertes Backup-System für Debian 12 mit `rsnapshot` und SMB-Shares.
 - Zentrales Mounten unter `/mnt/live-backup`
 - Automatische Cronjobs mit einfacher Uhrzeiteingabe (`HH:MM`)
 - Individuelle Retention-Einstellungen
+- Sichere SMB-Credentials in separaten Dateien (`chmod 600`)
+- Locking-Mechanismus verhindert parallele Backups
 - Logdateien pro Server und Backup-Typ
 - Alle Konfigurationen und Skripte liegen unter `/opt/R-Backup-Server`
 
@@ -46,6 +48,13 @@ Beispiel:
 - Daily um `2:00`
 - Weekly um `3:00` (Sonntag)
 - Monthly um `4:00` (1. des Monats)
+
+## Credentials
+Zugangsdaten werden gespeichert unter:
+```bash
+/opt/R-Backup-Server/credentials/<SERVERNAME>.smbcredentials
+```
+Nur root hat Zugriff (chmod 600).
 
 ## Verzeichnisstruktur
 
