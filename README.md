@@ -94,7 +94,7 @@ Default:
 - weekly: 4 Versionen
 - monthly: 3 Versionen
 
-### Mailbenachrichtigungen
+## Mailbenachrichtigungen
 
 - Erfolgreiche Backups: Mail mit Erfolgsmeldung
 - Fehlgeschlagene Backups: Mail mit Logausgabe im Body
