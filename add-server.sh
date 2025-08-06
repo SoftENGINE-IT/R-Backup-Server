@@ -1,11 +1,12 @@
 #!/bin/bash
-# add-server.sh - Fügt einen neuen Server ins Backup-System ein
+# add-server.sh - FÃ¼gt einen neuen Server ins Backup-System ein
 
 BASE_DIR="/opt/R-Backup-Server"
 CONFIG_DIR="${BASE_DIR}/configs"
 JOBS_DIR="${BASE_DIR}/jobs"
 LOGS_DIR="${BASE_DIR}/logs"
 CRED_DIR="${BASE_DIR}/credentials"
+SNAPSHOT_ROOT="/backups/${SERVERNAME}"
 
 mkdir -p "$CONFIG_DIR" "$JOBS_DIR" "$LOGS_DIR" "$CRED_DIR"
 
@@ -18,7 +19,7 @@ time_to_cron() {
     echo "$MINUTE $HOUR * * *"
 }
 
-# Eingaben
+# 1. Eingaben
 read -p "Name des neuen Servers: " SERVERNAME
 read -p "IP des neuen Servers: " SERVERIP
 read -p "Pfad des SMB-Shares [Standard: J]: " SHAREPATH
@@ -27,7 +28,7 @@ read -p "Benutzername des SMB-Shares: " SMBUSER
 read -s -p "Passwort des SMB-Shares: " SMBPASS
 echo
 
-# SMB-Credentials
+# 2. SMB-Credentials-Datei erstellen
 CRED_FILE="${CRED_DIR}/${SERVERNAME}.smbcredentials"
 cat > "$CRED_FILE" <<EOF
 username=${SMBUSER}
@@ -36,16 +37,17 @@ EOF
 chmod 600 "$CRED_FILE"
 
 echo "Backup-Zeiten eingeben (HH:MM-Format):"
-read -p "Tägliche Backups um: " TIME_DAILY
-read -p "Wöchentliche Backups um: " TIME_WEEKLY
+read -p "TÃ¤gliche Backups um: " TIME_DAILY
+read -p "WÃ¶chentliche Backups um: " TIME_WEEKLY
 read -p "Monatliche Backups um: " TIME_MONTHLY
 
+# Zeiten umwandeln
 CRON_DAILY=$(time_to_cron "$TIME_DAILY")
-CRON_WEEKLY=$(time_to_cron "$TIME_WEEKLY" | sed 's/* \* 0/* * 0/')
-CRON_MONTHLY=$(time_to_cron "$TIME_MONTHLY" | sed 's/* \* \*/1 * */')
+CRON_WEEKLY=$(time_to_cron "$TIME_WEEKLY" | sed 's/* \* 0/* * 0/')   # Sonntag
+CRON_MONTHLY=$(time_to_cron "$TIME_MONTHLY" | sed 's/* \* \*/1 * */') # 1. des Monats
 
-# Retention
-read -p "Abweichende Retention-Zeiträume? (y/N): " RET
+# 3. Retention
+read -p "Abweichende Retention-ZeitrÃ¤ume? (y/N): " RET
 RET=${RET:-N}
 
 DAILYS=7
@@ -61,23 +63,36 @@ if [[ "$RET" =~ ^[Yy]$ ]]; then
     MONTHLYS=${MONTHLYS:-3}
 fi
 
-# rsnapshot-Konfig erstellen
+# 4. rsnapshot-Konfiguration erstellen (mit echten Tabs und Backup-Zeile)
+
+# EntsprechendesBackup-Verzeichnis erstellen, falls nicht vorhanden
+if [ ! -d "$SNAPSHOT_ROOT" ]; then
+    mkdir -p "$SNAPSHOT_ROOT"
+    chmod 700 "$SNAPSHOT_ROOT"
+fi
+
 RSNAP_CONF="${CONFIG_DIR}/${SERVERNAME}.conf"
-cat > "$RSNAP_CONF" <<EOF
-config_version  1.2
-snapshot_root   /backups/${SERVERNAME}/
-no_create_root  1
+{
+printf "config_version\t1.2\n"
+printf "snapshot_root\t/backups/%s/\n" "$SERVERNAME"
+printf "no_create_root\t1\n\n"
+printf "retain\tdaily\t%s\n" "$DAILYS"
+printf "retain\tweekly\t%s\n" "$WEEKLYS"
+printf "retain\tmonthly\t%s\n\n" "$MONTHLYS"
+printf "cmd_rsync\t/usr/bin/rsync\n"
+printf "cmd_ssh\t/usr/bin/ssh\n"
+printf "cmd_logger\t/usr/bin/logger\n\n"
+printf "backup\t/mnt/live-backup/\tlocalhost/\n"
+} > "$RSNAP_CONF"
 
-retain  daily   ${DAILYS}
-retain  weekly  ${WEEKLYS}
-retain  monthly ${MONTHLYS}
+# 5. Config testen
+if ! rsnapshot -c "$RSNAP_CONF" configtest >/dev/null 2>&1; then
+    echo "FEHLER: Die rsnapshot-Konfiguration fÃ¼r $SERVERNAME ist ungÃ¼ltig!"
+    rsnapshot -c "$RSNAP_CONF" configtest
+    exit 1
+fi
 
-cmd_rsync       /usr/bin/rsync
-cmd_ssh         /usr/bin/ssh
-cmd_logger      /usr/bin/logger
-EOF
-
-# Skripte erstellen
+# 6. Backupskripte erstellen
 mkdir -p "${LOGS_DIR}/${SERVERNAME}"
 
 for TYPE in daily weekly monthly; do
@@ -89,7 +104,7 @@ EOF
     chmod +x "$SCRIPT_PATH"
 done
 
-# Cronjobs hinzufügen
+# 7. Cronjobs einrichten
 TMP_CRON=$(mktemp)
 crontab -l 2>/dev/null > "$TMP_CRON"
 
@@ -100,7 +115,7 @@ echo "$CRON_MONTHLY ${JOBS_DIR}/${SERVERNAME}-monthly.sh" >> "$TMP_CRON"
 crontab "$TMP_CRON"
 rm "$TMP_CRON"
 
-echo "Backup-Jobs für $SERVERNAME erfolgreich eingerichtet:"
+echo "Backup-Jobs fÃ¼r $SERVERNAME erfolgreich eingerichtet:"
 echo " - Daily um $TIME_DAILY"
 echo " - Weekly um $TIME_WEEKLY"
 echo " - Monthly um $TIME_MONTHLY"

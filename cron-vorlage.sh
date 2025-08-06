@@ -25,11 +25,11 @@ else
     MAIL_TO="root@localhost"
 fi
 
-# Lock setzen (verhindert parallele Ausführung)
+# Lock setzen (verhindert parallele AusfÃ¼hrung)
 exec 9>"$LOCKFILE"
 if ! flock -n 9; then
-    echo "Backup für $SERVERNAME ($BACKUPTYPE) läuft bereits – Abbruch." > "$LOGFILE"
-    echo "Backup für $SERVERNAME ($BACKUPTYPE) läuft bereits." | mail -s "[R-Backup] $SERVERNAME $BACKUPTYPE - Übersprungen" "$MAIL_TO"
+    echo "Backup fÃ¼r $SERVERNAME ($BACKUPTYPE) lÃ¤uft bereits â€“ Abbruch." > "$LOGFILE"
+    echo "Backup fÃ¼r $SERVERNAME ($BACKUPTYPE) lÃ¤uft bereits." | mail -s "[R-Backup] $SERVERNAME $BACKUPTYPE - Ãœbersprungen" "$MAIL_TO"
     exit 1
 fi
 
@@ -44,7 +44,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 2. rsnapshot für entsprechenden Typ ausführen
+# 2. rsnapshot fÃ¼r entsprechenden Typ ausfÃ¼hren
 echo "Running rsnapshot $BACKUPTYPE..." >> "$LOGFILE"
 rsnapshot -c "${BASE_DIR}/configs/${SERVERNAME}.conf" "$BACKUPTYPE" >> "$LOGFILE" 2>&1
 if [ $? -ne 0 ]; then

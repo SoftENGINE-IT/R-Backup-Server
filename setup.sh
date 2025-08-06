@@ -1,10 +1,10 @@
 #!/bin/bash
-# setup.sh - Installiert Abhängigkeiten und richtet Projektverzeichnisse ein
+# setup.sh - Installiert AbhÃ¤ngigkeiten und richtet Projektverzeichnisse ein
 
 echo "=== R-Backup-Server Setup ==="
 
 # Pakete installieren
-echo "Installiere benötigte Pakete..."
+echo "Installiere benÃ¶tigte Pakete..."
 apt update
 apt install -y rsync rsnapshot cifs-utils postfix mailutils
 
@@ -19,7 +19,7 @@ mkdir -p /mnt/live-backup
 chmod 700 /opt/R-Backup-Server/credentials
 
 # Mailadresse abfragen
-read -p "E-Mail-Adresse für Benachrichtigungen: " MAILADDR
+read -p "E-Mail-Adresse fÃ¼r Benachrichtigungen: " MAILADDR
 echo "MAIL_TO=$MAILADDR" > /opt/R-Backup-Server/mail.conf
 
 # Skripte kopieren
