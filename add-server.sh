@@ -37,8 +37,8 @@ EOF
 chmod 600 "$CRED_FILE"
 
 echo "Backup-Zeiten eingeben (HH:MM-Format):"
-read -p "TÃ¤gliche Backups um: " TIME_DAILY
-read -p "WÃ¶chentliche Backups um: " TIME_WEEKLY
+read -p "Tägliche Backups um: " TIME_DAILY
+read -p "Wöchentliche Backups um: " TIME_WEEKLY
 read -p "Monatliche Backups um: " TIME_MONTHLY
 
 # Zeiten umwandeln

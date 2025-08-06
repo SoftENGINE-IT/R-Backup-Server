@@ -15,6 +15,13 @@ mkdir -p /opt/R-Backup-Server/logs
 mkdir -p /opt/R-Backup-Server/configs
 mkdir -p /opt/R-Backup-Server/credentials
 mkdir -p /mnt/live-backup
+mkdir -p /opt/7z
+
+# 7-Zip installieren
+echo "Installiere 7-Zip..."
+wget -q "https://www.7-zip.org/a/7z2201-linux-x64.tar.xz" -O "/opt/7z"
+tar -xf 7z2201-linux-x64.tar.xz
+rm /opt/7z/7z2201-linux-x64.tar.xz
 
 chmod 700 /opt/R-Backup-Server/credentials
 
