@@ -1,12 +1,12 @@
 #!/bin/bash
-# setup.sh - Installiert AbhÃ¤ngigkeiten und richtet Projektverzeichnisse ein
+# setup.sh - Installiert Abhängigkeiten und richtet Projektverzeichnisse ein
 
 echo "=== R-Backup-Server Setup ==="
 
 # Pakete installieren
-echo "Installiere benÃ¶tigte Pakete..."
+echo "Installiere benötigte Pakete..."
 apt update
-apt install -y rsync rsnapshot cifs-utils postfix mailutils
+apt install -y rsync rsnapshot byobu bpytop htop cifs-utils postfix mailutils
 
 # Verzeichnisse anlegen
 echo "Erstelle Projektverzeichnisse..."
