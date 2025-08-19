@@ -25,11 +25,11 @@ else
     MAIL_TO="root@localhost"
 fi
 
-# Lock setzen (verhindert parallele AusfÃ¼hrung)
+# Lock setzen (verhindert parallele Ausfuehrung)
 exec 9>"$LOCKFILE"
 if ! flock -n 9; then
-    echo "Backup fÃ¼r $SERVERNAME ($BACKUPTYPE) lÃ¤uft bereits â€“ Abbruch." > "$LOGFILE"
-    echo "Backup fÃ¼r $SERVERNAME ($BACKUPTYPE) lÃ¤uft bereits." | mail -s "[R-Backup] $SERVERNAME $BACKUPTYPE - Ãœbersprungen" "$MAIL_TO"
+    echo "Backup fuer $SERVERNAME ($BACKUPTYPE) laeuft bereits â€“ Abbruch." > "$LOGFILE"
+    echo "Backup fuer $SERVERNAME ($BACKUPTYPE) laeuft bereits." | mail -s "[R-Backup] $SERVERNAME $BACKUPTYPE - Uebersprungen" "$MAIL_TO"
     exit 1
 fi
 
@@ -44,7 +44,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 2. rsnapshot fÃ¼r entsprechenden Typ ausfÃ¼hren
+# 2. rsnapshot fuer entsprechenden Typ ausfuehren
 echo "Running rsnapshot $BACKUPTYPE..." >> "$LOGFILE"
 rsnapshot -c "${BASE_DIR}/configs/${SERVERNAME}.conf" "$BACKUPTYPE" >> "$LOGFILE" 2>&1
 if [ $? -ne 0 ]; then
@@ -61,6 +61,28 @@ echo "backups complete" > "${MOUNTPOINT}/${STATUSFILE}"
 # 4. Unmount
 echo "Unmounting SMB share..." >> "$LOGFILE"
 umount "$MOUNTPOINT"
+
+# 5. Archiv erstellen (nach erfolgreichem Backup)
+echo "Creating archive..." >> "$LOGFILE"
+BACKUP_SOURCE="/opt/backups/${SERVERNAME}"
+ARCHIVE_DEST="${BASE_DIR}/archive/${SERVERNAME}"
+ARCHIVER_SCRIPT="${BASE_DIR}/archive/archivieren.sh"
+
+# Prüfen ob archivieren.sh existiert
+if [ -f "$ARCHIVER_SCRIPT" ] && [ -d "$BACKUP_SOURCE" ]; then
+    # Archivordner erstellen falls nicht vorhanden
+    mkdir -p "$ARCHIVE_DEST"
+    
+    # Archivierung ausführen
+    "$ARCHIVER_SCRIPT" "$BACKUP_SOURCE" "$ARCHIVE_DEST" >> "$LOGFILE" 2>&1
+    if [ $? -eq 0 ]; then
+        echo "Archive created successfully." >> "$LOGFILE"
+    else
+        echo "Warning: Archive creation failed." >> "$LOGFILE"
+    fi
+else
+    echo "Warning: Archiver script or backup source not found." >> "$LOGFILE"
+fi
 
 echo "=== Backup $BACKUPTYPE beendet am $(date '+%Y-%m-%d %H:%M:%S') ===" >> "$LOGFILE"
 
