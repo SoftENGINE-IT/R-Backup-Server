@@ -1,5 +1,5 @@
 #!/bin/bash
-# add-server.sh - FÃ¼gt einen neuen Server ins Backup-System ein
+# add-server.sh - Fuegt einen neuen Server ins Backup-System ein
 
 BASE_DIR="/opt/R-Backup-Server"
 CONFIG_DIR="${BASE_DIR}/configs"
@@ -87,7 +87,7 @@ printf "backup\t/mnt/live-backup/\tlocalhost/\n"
 
 # 5. Config testen
 if ! rsnapshot -c "$RSNAP_CONF" configtest >/dev/null 2>&1; then
-    echo "FEHLER: Die rsnapshot-Konfiguration fÃ¼r $SERVERNAME ist ungÃ¼ltig!"
+    echo "FEHLER: Die rsnapshot-Konfiguration fuer $SERVERNAME ist ungueltig!"
     rsnapshot -c "$RSNAP_CONF" configtest
     exit 1
 fi
@@ -115,8 +115,29 @@ echo "$CRON_MONTHLY ${JOBS_DIR}/${SERVERNAME}-monthly.sh" >> "$TMP_CRON"
 crontab "$TMP_CRON"
 rm "$TMP_CRON"
 
-echo "Backup-Jobs fÃ¼r $SERVERNAME erfolgreich eingerichtet:"
+# 8. Archiv-Konfiguration (optional)
+read -p "Nächtliche Archivierung um 4:00 Uhr aktivieren? (y/N): " ENABLE_ARCHIVE
+ENABLE_ARCHIVE=${ENABLE_ARCHIVE:-N}
+
+ARCHIVE_MESSAGE=""
+if [[ "$ENABLE_ARCHIVE" =~ ^[Yy]$ ]]; then
+    ARCHIVE_CONFIG="${BASE_DIR}/archive/archive-config.conf"
+    BACKUP_SOURCE="/opt/backups/${SERVERNAME}"
+    ARCHIVE_DEST="${BASE_DIR}/archive/${SERVERNAME}"
+
+    # Archiv-Eintrag zur Konfiguration hinzufügen
+    if [ -f "$ARCHIVE_CONFIG" ]; then
+        echo "${SERVERNAME};${BACKUP_SOURCE};${ARCHIVE_DEST}" >> "$ARCHIVE_CONFIG"
+        echo "Archiv-Konfiguration für $SERVERNAME hinzugefügt."
+        ARCHIVE_MESSAGE=" - Tägliche Archivierung um 4:00 Uhr"
+    else
+        echo "WARNUNG: Archiv-Konfigurationsdatei nicht gefunden: $ARCHIVE_CONFIG"
+    fi
+fi
+
+echo "Backup-Jobs fuer $SERVERNAME erfolgreich eingerichtet:"
 echo " - Daily um $TIME_DAILY"
-echo " - Weekly um $TIME_WEEKLY"
+echo " - Weekly um $TIME_WEEKLY" 
 echo " - Monthly um $TIME_MONTHLY"
+echo "$ARCHIVE_MESSAGE"
 echo "Logs: ${LOGS_DIR}/${SERVERNAME}/"
