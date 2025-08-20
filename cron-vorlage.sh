@@ -64,8 +64,8 @@ umount "$MOUNTPOINT"
 
 # 5. Archiv erstellen (nach erfolgreichem Backup)
 echo "Creating archive..." >> "$LOGFILE"
-BACKUP_SOURCE="/opt/backups/${SERVERNAME}"
-ARCHIVE_DEST="${BASE_DIR}/archive/${SERVERNAME}"
+BACKUP_SOURCE="/backups/${SERVERNAME}/daily.0"
+ARCHIVE_DEST="/opt/archive/${SERVERNAME}"
 ARCHIVER_SCRIPT="${BASE_DIR}/archive/archivieren.sh"
 
 # Prüfen ob archivieren.sh existiert

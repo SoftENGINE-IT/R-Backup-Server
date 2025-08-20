@@ -16,6 +16,8 @@ mkdir -p /opt/R-Backup-Server/configs
 mkdir -p /opt/R-Backup-Server/credentials
 mkdir -p /mnt/live-backup
 mkdir -p /opt/7z
+mkdir -p /backups
+mkdir -p /opt/archive
 
 # 7-Zip installieren
 echo "Installiere 7-Zip..."

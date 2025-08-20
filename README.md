@@ -12,6 +12,7 @@ Automatisiertes Backup-System für Debian 12 mit `rsnapshot` und SMB-Shares.
 - Locking-Mechanismus verhindert parallele Backups
 - Logdateien pro Server und Backup-Typ
 - Alle Konfigurationen und Skripte liegen unter `/opt/R-Backup-Server`
+- Backups werden in `/backups/` gespeichert, Archive in `/opt/archive/`
 
 ---
 
@@ -62,6 +63,10 @@ Nur root hat Zugriff (chmod 600).
 /opt/R-Backup-Server/
 ├── add-server.sh
 ├── cron-vorlage.sh
+├── archive/            # Archivierungs-Konfigurationen
+│   ├── .env
+│   ├── archive-config.conf
+│   └── archivieren.sh
 ├── configs/            # rsnapshot-Konfigurationen
 │   └── WWR02.conf
 ├── credentials/
@@ -70,7 +75,7 @@ Nur root hat Zugriff (chmod 600).
 │   ├── WWR02-daily.sh
 │   ├── WWR02-weekly.sh
 │   └── WWR02-monthly.sh
-└── logs/
+└── logs/               # Logs
     └── WWR02/
         ├── WWR02-daily.log
         ├── WWR02-weekly.log
@@ -85,7 +90,7 @@ Logs befinden sich unter:
 ```
 
 ## Mountpoint
-SMB-Share wird immer unter `/mnt/live-backup` gemountet.
+Der aktive SMB-Share wird immer unter `/mnt/live-backup` gemountet.
 
 ## Retention
 Default:
@@ -94,7 +99,22 @@ Default:
 - weekly: 4 Versionen
 - monthly: 3 Versionen
 
-## Mailbenachrichtigungen
+## Archive (7zs)
+Bei dem hinzufügen eines neuen Servers wird nun immer als letztes gefragt, ob automatisch tägliche Archive ertsellt werden sollen.
+Dies wird durch ein eigenes als cronjob eingebundenes Skript realisiert, welches täglich um 4 Uhr aus allen Backups (für die Maschinen, bei denen es eingetragen wurde) 7z Archive erstellt.
+
+Es wird bei dem akzeptieren des Archivs beim hinzufügen eines Servers ein neuer Eintrag in
+```
+~/archive/archive-config.conf
+```
+erzeugt. Der erzeugte Eintrag hat folgende Form:
+```conf
+serverName;/backups/serverName/daily.0;/opt/archive/serverName
+```
+Archive werden als 7z erzeugt und können durch die Angabe eines Passworts in der `.env` Datei unter `~/archive/` verschlüsselt werden.
+
+
+## Mailbenachrichtigungen (beta)
 
 - Erfolgreiche Backups: Mail mit Erfolgsmeldung
 - Fehlgeschlagene Backups: Mail mit Logausgabe im Body

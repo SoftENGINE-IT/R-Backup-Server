@@ -94,6 +94,7 @@ fi
 
 # 6. Backupskripte erstellen
 mkdir -p "${LOGS_DIR}/${SERVERNAME}"
+mkdir -p "/backups/${SERVERNAME}"
 
 for TYPE in daily weekly monthly; do
     SCRIPT_PATH="${JOBS_DIR}/${SERVERNAME}-${TYPE}.sh"
@@ -122,8 +123,8 @@ ENABLE_ARCHIVE=${ENABLE_ARCHIVE:-N}
 ARCHIVE_MESSAGE=""
 if [[ "$ENABLE_ARCHIVE" =~ ^[Yy]$ ]]; then
     ARCHIVE_CONFIG="${BASE_DIR}/archive/archive-config.conf"
-    BACKUP_SOURCE="/opt/backups/${SERVERNAME}"
-    ARCHIVE_DEST="${BASE_DIR}/archive/${SERVERNAME}"
+    BACKUP_SOURCE="/backups/${SERVERNAME}/daily.0"
+    ARCHIVE_DEST="/opt/archive/${SERVERNAME}"
 
     # Archiv-Eintrag zur Konfiguration hinzufügen
     if [ -f "$ARCHIVE_CONFIG" ]; then
