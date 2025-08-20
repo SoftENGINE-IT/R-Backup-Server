@@ -113,6 +113,10 @@ serverName;/backups/serverName/daily.0;/opt/archive/serverName
 ```
 Archive werden als 7z erzeugt und können durch die Angabe eines Passworts in der `.env` Datei unter `~/archive/` verschlüsselt werden.
 
+Die erstellten Archive werden Abgelegt unter:
+```bash
+/opt/archive/serverName/
+```
 
 ## Mailbenachrichtigungen (beta)
 
