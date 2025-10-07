@@ -20,7 +20,7 @@ time_to_cron() {
 }
 
 # 1. Eingaben
-read -p "Name des neuen Servers: " SERVERNAME
+read -p "Name des neuen Backups: " SERVERNAME
 read -p "IP des neuen Servers: " SERVERIP
 read -p "Pfad des SMB-Shares [Standard: J]: " SHAREPATH
 SHAREPATH=${SHAREPATH:-J}

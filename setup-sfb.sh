@@ -10,6 +10,7 @@ HOSTIP=$(hostname -I | awk '{print $1}')
 ## Instalaltion Simple File Browser
 curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 
+mkdir -p /backups/archive
 mkdir -p /opt/filebrowser
 cd /opt/filebrowser
 
@@ -36,7 +37,7 @@ After=network.target
 [Service]
 User=root
 Group=filebrowser
-ExecStart=/usr/local/bin/filebrowser -r /opt/archive --address $HOSTIP -d /opt/filebrowser/filebrowser.db
+ExecStart=/usr/local/bin/filebrowser -r /backups/archive --address $HOSTIP -d /opt/filebrowser/filebrowser.db
 WorkingDirectory=/opt/archive
 Restart=always
 RestartSec=5
