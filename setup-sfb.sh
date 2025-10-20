@@ -14,19 +14,18 @@ mkdir -p /backups/archive
 mkdir -p /opt/filebrowser
 cd /opt/filebrowser
 
-## Konfiguration
-filebrowser config init
-filebrowser config --database /opt/filebrowser/filebrowser.db
-filebrowser config set --address $HOSTIP --branding.name $BRAND_NAME --auth.method=json
-
 ## Filebrwoser Benutzer und Dateuberechtigungen
 useradd -r -s /bin/false filebrowser
 chown -R root:filebrowser /opt/filebrowser
 
+## Konfiguration
+filebrowser config init
+filebrowser config set --address "$HOSTIP" --branding.name "$BRAND_NAME" --auth.method=json
+
 ## Filebrowser Admin Benutzer erstellen
-filebrowser users add $ADMIN_USER_NAME $ADMIN_PASSWORD
-filebrowser users update $ADMIN_USER_NAME --perm.admin
-filebrowser users update $ADMIN_USER_NAME --locale de
+filebrowser users add "$ADMIN_USER_NAME" "$ADMIN_PASSWORD"
+filebrowser users update "$ADMIN_USER_NAME" --perm.admin
+filebrowser users update "$ADMIN_USER_NAME" --locale de
 
 ## Filebrowser Service erstellen und starten
 cat <<EOF | sudo tee /etc/systemd/system/filebrowser.service
