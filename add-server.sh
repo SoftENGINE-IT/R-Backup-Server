@@ -23,6 +23,11 @@ read -p "Name des neuen Backups: " SERVERNAME
 read -p "IP des neuen Servers: " SERVERIP
 read -p "Pfad des SMB-Shares [Standard: J]: " SHAREPATH
 SHAREPATH=${SHAREPATH:-J}
+
+# Windows-UNC-Pfade normalisieren: Backslashes in Forward-Slashes umwandeln
+# und führende Slashes entfernen (z.B. \\server\share -> server/share)
+SHAREPATH=$(echo "$SHAREPATH" | sed 's/\\/\//g' | sed 's/^\/\///')
+
 read -p "Benutzername des SMB-Shares: " SMBUSER
 read -s -p "Passwort des SMB-Shares: " SMBPASS
 echo
