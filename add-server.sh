@@ -6,7 +6,6 @@ CONFIG_DIR="${BASE_DIR}/configs"
 JOBS_DIR="${BASE_DIR}/jobs"
 LOGS_DIR="${BASE_DIR}/logs"
 CRED_DIR="${BASE_DIR}/credentials"
-SNAPSHOT_ROOT="/backups/${SERVERNAME}"
 
 mkdir -p "$CONFIG_DIR" "$JOBS_DIR" "$LOGS_DIR" "$CRED_DIR"
 
@@ -27,6 +26,8 @@ SHAREPATH=${SHAREPATH:-J}
 read -p "Benutzername des SMB-Shares: " SMBUSER
 read -s -p "Passwort des SMB-Shares: " SMBPASS
 echo
+
+SNAPSHOT_ROOT="/backups/${SERVERNAME}"
 
 # 2. SMB-Credentials-Datei erstellen
 CRED_FILE="${CRED_DIR}/${SERVERNAME}.smbcredentials"
