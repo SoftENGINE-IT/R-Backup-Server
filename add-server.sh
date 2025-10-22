@@ -88,6 +88,7 @@ printf "retain\tmonthly\t%s\n\n" "$MONTHLYS"
 printf "cmd_rsync\t/usr/bin/rsync\n"
 printf "cmd_ssh\t/usr/bin/ssh\n"
 printf "cmd_logger\t/usr/bin/logger\n\n"
+printf "exclude\t*.dmp\n\n"
 printf "backup\t/mnt/live-backup/\tlocalhost/\n"
 } > "$RSNAP_CONF"
 
